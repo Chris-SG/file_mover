@@ -8,6 +8,19 @@ directory_copy::directory_copy(fs::path inpath)
 	a_inpath = inpath;
 }
 
+directory_copy::~directory_copy()
+{
+	fs::recursive_directory_iterator end;
+	for (fs::recursive_directory_iterator it(a_inpath); it != end;)
+	{
+		auto fpath = *it++;
+		if (fs::is_regular_file(fpath))
+		{
+			fs::remove(fpath);
+		}
+	}
+}
+
 bool directory_copy::copy(std::string share, std::string user, std::string password, std::string to_path)
 {
 	auto open_code = open_connection(const_cast<LPSTR>(share.c_str()), const_cast<LPSTR>(user.c_str()), const_cast<LPSTR>(password.c_str()));

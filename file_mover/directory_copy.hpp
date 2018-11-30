@@ -20,5 +20,6 @@ private:
 
 public:
 	directory_copy(std::filesystem::path inpath);
+	~directory_copy();
 	bool copy(std::string share, std::string user, std::string password, std::string to_path);
 };
