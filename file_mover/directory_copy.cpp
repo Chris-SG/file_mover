@@ -71,11 +71,13 @@ bool directory_copy::copy(std::string share, std::string user, std::string passw
 				{
 					if (fs::is_regular_file(a))
 					{
-						fs::copy(a, to, fs::copy_options::update_existing);
+						CopyFileA(a.path().string().c_str(), to.string().c_str(), 0);
+						//fs::copy(a, to, fs::copy_options::update_existing);
 					}
 					else
 					{
-						fs::copy(a, to);
+						CopyFileA(a.path().string().c_str(), to.string().c_str(), 1);
+						//fs::copy(a, to);
 					}
 				}
 				catch (std::exception& e)
