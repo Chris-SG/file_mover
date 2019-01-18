@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include "logger.hpp"
 
 struct destination
 {
