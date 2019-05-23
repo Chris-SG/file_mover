@@ -1,10 +1,13 @@
 #pragma once
-#include "pch.h"
 
+#include <fstream>
+#include <chrono>
+#include <mutex>
 
 namespace logger
 {
 	static std::ofstream logfile = std::ofstream();
+	static std::mutex m = std::mutex();
 
 	std::string time_now();
 	bool open(std::string log);

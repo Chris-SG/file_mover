@@ -1,5 +1,11 @@
-#include "pch.h"
+#include <filesystem>
+#include <iostream>
+#include <sstream>
+
+
 #include "directory_copy.hpp"
+
+#pragma comment(lib,"Mpr.lib") 
 
 namespace fs = std::filesystem;
 
@@ -50,6 +56,9 @@ bool directory_copy::copy(std::string share, std::string user, std::string passw
 		std::cout << "Copying files from " << a_inpath << ". Please wait...\n";
 		m.unlock();
 		std::string buf;
+		auto create_dir = [&a_inpath = a_inpath](fs::directory_entry a, fs::path to) { CreateDirectoryA(to.string().c_str(), 0); };
+		auto create_file = [&a_inpath = a_inpath](fs::directory_entry a, fs::path to) { CopyFileA(a.path().string().c_str(), to.string().c_str(), 0); };
+		auto create_other = [&a_inpath = a_inpath](fs::directory_entry a, fs::path to) { CopyFileA(a.path().string().c_str(), to.string().c_str(), 1); };
 		for (auto& a : fs::recursive_directory_iterator(a_inpath))
 		{
 			buf = a.path().string();
@@ -63,16 +72,9 @@ bool directory_copy::copy(std::string share, std::string user, std::string passw
 				to /= fs::path(to_path + buf);
 				try
 				{
-					if (fs::is_regular_file(a))
-					{
-						CopyFileA(a.path().string().c_str(), to.string().c_str(), 0);
-						//fs::copy(a, to, fs::copy_options::update_existing);
-					}
-					else
-					{
-						CopyFileA(a.path().string().c_str(), to.string().c_str(), 1);
-						//fs::copy(a, to);
-					}
+					if (fs::is_directory(a) && !fs::exists(to)) create_dir(a, to);
+					else if (fs::is_regular_file(a)) create_file(a, to);
+					else create_other(a, to);
 				}
 				catch (std::exception& e)
 				{
@@ -86,7 +88,6 @@ bool directory_copy::copy(std::string share, std::string user, std::string passw
 				}
 			}
 		}
-		//fs::copy(a_inpath, fs::path(share + to_path), fs::copy_options::update_existing | fs::copy_options::recursive);
 	}
 	catch (std::exception& e)
 	{

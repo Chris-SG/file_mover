@@ -1,17 +1,13 @@
-#include "pch.h"
-#include "logger.hpp"
+#include <sstream>
+#include <ctime>
+#include <iomanip>
+#include <algorithm>
+#include <iostream>
+
+#include "../inc/logger.hpp"
 
 std::string logger::time_now()
 {
-
-	/*auto now = std::chrono::system_clock::now();
-	auto in_time_t = std::chrono::system_clock::to_time_t(now);
-	std::stringstream ss;
-	tm time;
-	localtime_s(&time, &in_time_t);
-	ss << std::put_time(time, "%Y-%m-%d %X");
-	return ss.str();*/
-
 	std::time_t t = std::time(nullptr);
 	std::tm tm;
 	localtime_s(&tm, &t);
@@ -42,7 +38,9 @@ bool logger::write(std::string write)
 {
 	if (logfile.is_open())
 	{
+		m.lock();
 		logfile << "[" << time_now() << "]" << write << "\n";
+		m.unlock();
 		return true;
 	}
 	return false;
@@ -91,21 +89,15 @@ std::string logger::format_time(std::chrono::hours hr, std::string fmt)
 		{
 			if (days <= 30)
 				break;
-			else
-			{
-				days -= 30;
-				++months;
-			}
+			days -= 30;
+			++months;
 		}
 		else if (std::find(std::begin(months_31), std::end(months_31), months))
 		{
 			if (days <= 31)
 				break;
-			else
-			{
-				days -= 31;
-				++months;
-			}
+			days -= 31;
+			++months;
 		}
 		else
 		{
@@ -122,20 +114,15 @@ std::string logger::format_time(std::chrono::hours hr, std::string fmt)
 		}
 	}
 
-	fmt.replace(fmt.find("%Y"), 2, std::to_string(epoch_year + years));
-	fmt.replace(fmt.find("%m"), 2, std::to_string(months));
-	fmt.replace(fmt.find("%d"), 2, std::to_string(days));
+	size_t pos;
+	if(pos = fmt.find("%Y") != std::string::npos) fmt.replace(pos, 2, std::to_string(epoch_year + years));
+	if(pos = fmt.find("%m") != std::string::npos) fmt.replace(pos, 2, std::to_string(months));
+	if(pos = fmt.find("%d") != std::string::npos) fmt.replace(pos, 2, std::to_string(days));
 
 	return fmt;
 }
 
 bool logger::is_leap_year(uint32_t year)
 {
-	if (year % 4 != 0)
-		return false;
-	else if (year % 100 != 0)
-		return true;
-	else if (year % 400 != 0)
-		return false;
-	return true;
+	return(year % 4 != 0 ? false : (year % 100 != 0 ? true : (year % 400 != 0 ? false : true)));
 }
