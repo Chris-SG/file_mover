@@ -19,6 +19,7 @@ private:
 	static std::mutex m;
 	std::filesystem::path a_inpath;
 
+
 	DWORD open_connection(LPSTR path, LPSTR user, LPSTR password);
 	DWORD close_connection(LPSTR path);
 
